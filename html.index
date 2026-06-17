@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Suggest Explorer - Keyword Branching Tool</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0f172a;
+        }
+        .heading-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+<body class="text-slate-100 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+
+    <!-- Header -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-tr from-indigo-500 to-violet-500 p-2 rounded-xl shadow-lg shadow-indigo-500/20">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="heading-font text-lg font-bold bg-gradient-to-r from-indigo-400 via-violet-400 to-pink-400 bg-clip-text text-transparent">Deep Suggest Explorer</h1>
+                    <p class="text-xs text-slate-400">Strumento di Keyword Branching Ricorsivo</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="text-xs bg-slate-800 px-3 py-1 rounded-full text-slate-300 border border-slate-700/50 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Google Autocomplete API (CORS Bypass)
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Left Sidebar: Settings and Controls (4 Cols) -->
+        <div class="lg:col-span-4 space-y-6">
+            
+            <!-- Configurations Card -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-5">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <h2 class="heading-font font-bold text-slate-200 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                        </svg>
+                        Configuratore di Ricerca
+                    </h2>
+                </div>
+
+                <!-- Seed Keyword -->
+                <div>
+                    <label for="seedKeyword" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Keyword Iniziale (Seme)</label>
+                    <input type="text" id="seedKeyword" placeholder="es. AI per" value="AI per" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition duration-200">
+                </div>
+
+                <!-- Expansion Strategies -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Metodo di Espansione (Multipla)</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="relative flex flex-col p-3 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer hover:border-slate-700 transition">
+                            <input type="checkbox" name="strategy" value="direct" checked class="absolute top-3 right-3 text-indigo-600 rounded bg-slate-900 border-slate-700 focus:ring-indigo-500">
+                            <span class="text-sm font-medium text-slate-200">Solo Diretta</span>
+                            <span class="text-xs text-slate-500 mt-0.5">Analizza solo il seme</span>
+                        </label>
+                        <label class="relative flex flex-col p-3 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer hover:border-slate-700 transition">
+                            <input type="checkbox" name="strategy" value="az" class="absolute top-3 right-3 text-indigo-600 rounded bg-slate-900 border-slate-700 focus:ring-indigo-500">
+                            <span class="text-sm font-medium text-slate-200">Alfabetica (A-Z)</span>
+                            <span class="text-xs text-slate-500 mt-0.5">Seme + [a-z]</span>
+                        </label>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 mt-2">
+                        <label class="relative flex flex-col p-3 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer hover:border-slate-700 transition">
+                            <input type="checkbox" name="strategy" value="questions" class="absolute top-3 right-3 text-indigo-600 rounded bg-slate-900 border-slate-700 focus:ring-indigo-500">
+                            <span class="text-sm font-medium text-slate-200">Domande</span>
+                            <span class="text-xs text-slate-500 mt-0.5">[come, perché...] + seme</span>
+                        </label>
+                        <label class="relative flex flex-col p-3 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer hover:border-slate-700 transition">
+                            <input type="checkbox" name="strategy" value="prepositions" class="absolute top-3 right-3 text-indigo-600 rounded bg-slate-900 border-slate-700 focus:ring-indigo-500">
+                            <span class="text-sm font-medium text-slate-200">Preposizioni</span>
+                            <span class="text-xs text-slate-500 mt-0.5">Seme + [per, con...]</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Depth Limit & Safeties -->
+                <div class="grid grid-cols-2 gap-4 pt-2">
+                    <div>
+                        <label for="searchDepth" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Profondità (Branch)</label>
+                        <select id="searchDepth" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+                            <option value="1">Livello 1 (Lineare)</option>
+                            <option value="2" selected>Livello 2 (Ramificato)</option>
+                            <option value="3">Livello 3 (Ultra-Profondo)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="maxQueries" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Max Chiamate API</label>
+                        <input type="number" id="maxQueries" value="150" min="10" max="1000" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="requestDelay" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Delay Antiban (ms)</label>
+                        <input type="number" id="requestDelay" value="400" min="100" max="5000" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+                    </div>
+                    <div>
+                        <label for="targetLanguage" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Lingua / Geo</label>
+                        <select id="targetLanguage" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+                            <option value="it" selected>Italiano (IT)</option>
+                            <option value="en">Inglese (EN)</option>
+                            <option value="es">Spagnolo (ES)</option>
+                            <option value="fr">Francese (FR)</option>
+                            <option value="de">Tedesco (DE)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Dynamic Keyword Filters -->
+                <div class="space-y-3 pt-2">
+                    <div>
+                        <label for="filterInclude" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Includi solo se contiene (Opzionale)</label>
+                        <input type="text" id="filterInclude" placeholder="es. avvocati, medici" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 placeholder-slate-700 focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="filterExclude" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Escludi se contiene (Opzionale)</label>
+                        <input type="text" id="filterExclude" placeholder="es. pdf, crack" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 placeholder-slate-700 focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- Action Button Trigger -->
+                <div class="pt-4 border-t border-slate-800/80">
+                    <button id="startBtn" onclick="toggleScraper()" class="w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-indigo-500/25 hover:brightness-110 active:scale-[0.98] transition flex items-center justify-center gap-2">
+                        <svg id="playIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <svg id="stopIcon" class="w-5 h-5 hidden animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1 1 1 0 011 1v4a1 1 0 01-1 1 1 1 0 01-1-1v-4z" />
+                        </svg>
+                        <span id="btnText">Avvia Ricerca Ramificata</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats/Real-time Monitoring Card -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+                <h3 class="heading-font font-bold text-slate-200 text-sm">Monitoraggio in Tempo Reale</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/60">
+                        <span class="block text-xs text-slate-500 font-medium">Keywords Trovate</span>
+                        <span id="statCount" class="text-2xl font-bold heading-font text-indigo-400">0</span>
+                    </div>
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/60">
+                        <span class="block text-xs text-slate-500 font-medium">Query API Eseguite</span>
+                        <span id="statApiCount" class="text-2xl font-bold heading-font text-pink-400">0 / 0</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/60">
+                        <span class="block text-xs text-slate-500 font-medium">Query in Coda</span>
+                        <span id="statQueue" class="text-2xl font-bold heading-font text-amber-400">0</span>
+                    </div>
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/60">
+                        <span class="block text-xs text-slate-500 font-medium">Stato Crawler</span>
+                        <span id="statStatus" class="text-sm font-semibold heading-font text-slate-400 flex items-center gap-1.5 mt-1">
+                            <span class="w-2.5 h-2.5 rounded-full bg-slate-600 block"></span> Inattivo
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Custom Progress Bar -->
+                <div class="space-y-1">
+                    <div class="flex justify-between text-xs text-slate-500">
+                        <span>Avanzamento Coda</span>
+                        <span id="progressPercent">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+                        <div id="progressBar" class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 h-full w-0 transition-all duration-300"></div>
+                    </div>
+                </div>
+
+                <!-- Console Output Log -->
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 h-28 overflow-y-auto text-[10px] font-mono text-slate-400 space-y-1" id="consoleLog">
+                    <div class="text-slate-600">> Pronto all'uso. Inserisci una parola chiave.</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Side: Results Presentation (8 Cols) -->
+        <div class="lg:col-span-8 flex flex-col space-y-6">
+            
+            <!-- Result Controls / Search Filters -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex items-center gap-2">
+                    <span class="heading-font font-bold text-slate-200">Risultati Estratti</span>
+                    <span class="bg-slate-800 text-xs text-indigo-300 border border-indigo-500/20 px-2 py-0.5 rounded-md" id="badgeTotal">0 unique</span>
+                </div>
+                
+                <div class="flex items-center gap-2 self-stretch md:self-auto">
+                    <!-- Tab Switcher -->
+                    <div class="bg-slate-950 p-1 rounded-xl border border-slate-800 flex items-center gap-1">
+                        <button onclick="switchTab('table')" id="tabBtnTable" class="px-3 py-1.5 rounded-lg text-xs font-medium transition bg-slate-800 text-white">
+                            Tabella Elenco
+                        </button>
+                        <button onclick="switchTab('tree')" id="tabBtnTree" class="px-3 py-1.5 rounded-lg text-xs font-medium transition text-slate-400 hover:text-white">
+                            Albero Ramificato
+                        </button>
+                    </div>
+
+                    <!-- Actions -->
+                    <button onclick="exportToCSV()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white text-xs font-medium py-2 px-3 rounded-xl transition flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Esporta CSV
+                    </button>
+                    <button onclick="copyToClipboard()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white text-xs font-medium py-2 px-3 rounded-xl transition flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                        </svg>
+                        Copia Lista
+                    </button>
+                </div>
+            </div>
+
+            <!-- View 1: Table Listing -->
+            <div id="viewTable" class="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl flex-1 overflow-hidden flex flex-col min-h-[500px]">
+                <div class="px-6 py-4 border-b border-slate-800 flex items-center gap-3">
+                    <input type="text" id="tableSearch" oninput="renderTable()" placeholder="Filtra tra i risultati..." class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-xs w-64 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-200">
+                    <div class="flex gap-2">
+                        <button onclick="setDepthFilter(0)" id="depthFilterAll" class="text-xs px-2.5 py-1 rounded-md bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-medium">Tutti i Livelli</button>
+                        <button onclick="setDepthFilter(1)" id="depthFilter1" class="text-xs px-2.5 py-1 rounded-md bg-slate-950 text-slate-400 border border-slate-800 font-medium hover:text-slate-200">Livello 1</button>
+                        <button onclick="setDepthFilter(2)" id="depthFilter2" class="text-xs px-2.5 py-1 rounded-md bg-slate-950 text-slate-400 border border-slate-800 font-medium hover:text-slate-200">Livello 2</button>
+                        <button onclick="setDepthFilter(3)" id="depthFilter3" class="text-xs px-2.5 py-1 rounded-md bg-slate-950 text-slate-400 border border-slate-800 font-medium hover:text-slate-200">Livello 3</button>
+                    </div>
+                </div>
+                <div class="flex-1 overflow-y-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-950/50 border-b border-slate-800 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                                <th class="py-3 px-6">ID</th>
+                                <th class="py-3 px-6">Keyword Suggerita</th>
+                                <th class="py-3 px-6">Generata Da (Parent)</th>
+                                <th class="py-3 px-6 text-center">Livello Profondità</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody" class="text-sm divide-y divide-slate-800/60">
+                            <!-- Rows dynamically populated -->
+                            <tr>
+                                <td colspan="4" class="py-12 text-center text-slate-500">Nessuna ricerca avviata. Clicca su "Avvia" per raccogliere dati.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- View 2: Tree Visualizer (Hierarchical) -->
+            <div id="viewTree" class="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl flex-1 overflow-hidden flex flex-col min-h-[500px] hidden">
+                <div class="px-6 py-4 border-b border-slate-800 bg-slate-950/40">
+                    <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Mappa delle Ramificazioni Logiche</h4>
+                    <p class="text-xs text-slate-500 mt-1">Questa visualizzazione mappa come le parole chiave si collegano in profondità alle query madri.</p>
+                </div>
+                <div class="flex-1 p-6 overflow-y-auto" id="treeContainer">
+                    <div class="text-center text-slate-500 py-12">I risultati ramificati verranno mostrati qui come mappa ad albero durante o dopo la ricerca.</div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Custom Toast Notification Box -->
+    <div id="customToast" class="fixed bottom-6 right-6 bg-slate-900 border border-indigo-500/30 text-slate-100 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transform translate-y-20 opacity-0 pointer-events-none transition duration-300 z-[100]">
+        <div class="bg-indigo-500/10 text-indigo-400 p-1.5 rounded-lg">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </div>
+        <div>
+            <p id="toastMessage" class="text-xs font-semibold">Messaggio</p>
+        </div>
+    </div>
+
+    <!-- Script Block -->
+    <script>
+        // Core states
+        let queue = [];
+        let completedQueries = new Set();
+        let uniqueKeywords = new Set();
+        let resultsList = []; // { id: 1, keyword: '', parent: '', depth: 1 }
+        
+        let isRunning = false;
+        let selectedTab = 'table';
+        let currentFilterDepth = 0; // 0 = all
+        let totalApiCallsExpected = 0;
+        let actualApiCallCount = 0;
+
+        // Visual Logs
+        function logToConsole(message, type = 'info') {
+            const consoleBox = document.getElementById('consoleLog');
+            const colorClass = type === 'success' ? 'text-emerald-400' : 
+                               type === 'error' ? 'text-rose-400' : 
+                               type === 'warn' ? 'text-amber-400' : 'text-slate-400';
+            const logItem = document.createElement('div');
+            logItem.className = `${colorClass}`;
+            logItem.innerHTML = `<span class="text-slate-600">[${new Date().toLocaleTimeString()}]</span> > ${message}`;
+            consoleBox.appendChild(logItem);
+            consoleBox.scrollTop = consoleBox.scrollHeight;
+        }
+
+        // Show toast modal
+        function showToast(message) {
+            const toast = document.getElementById('customToast');
+            const text = document.getElementById('toastMessage');
+            text.innerText = message;
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+
+        // JSONP Implementation to Bypass CORS for Google Autocomplete Suggest
+        function fetchSuggestions(query, lang) {
+            return new Promise((resolve) => {
+                // Generate a random callback name for JSONP
+                const callbackName = 'suggest_cb_' + Math.floor(Math.random() * 1000000);
+                
+                // Assign temporary global callback
+                window[callbackName] = function(data) {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    // data format from google: [query, [suggest1, suggest2, ...], ...]
+                    const suggestions = data && data[1] ? data[1] : [];
+                    resolve(suggestions);
+                };
+
+                // Create script tag
+                const script = document.createElement('script');
+                const encodedQuery = encodeURIComponent(query);
+                script.src = `https://suggestqueries.google.com/complete/search?client=chrome&hl=${lang}&q=${encodedQuery}&callback=${callbackName}`;
+                
+                script.onerror = () => {
+                    delete window[callbackName];
+                    try {
+                        document.body.removeChild(script);
+                    } catch(e){}
+                    logToConsole(`Impossibile recuperare i suggerimenti per: "${query}"`, 'error');
+                    resolve([]); // Return empty on error to keep queue rolling
+                };
+
+                document.body.appendChild(script);
+            });
+        }
+
+        // Generate seeds according to expansion logic
+        function buildSeedQueries(seed, strategies) {
+            const trimmed = seed.trim();
+            let queries = new Set();
+
+            strategies.forEach(strategy => {
+                if (strategy === 'direct') {
+                    queries.add(trimmed);
+                } else if (strategy === 'az') {
+                    queries.add(trimmed);
+                    const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
+                    alphabet.forEach(char => {
+                        queries.add(`${trimmed} ${char}`);
+                    });
+                } else if (strategy === 'questions') {
+                    const prompts = ['come', 'perché', 'cosa', 'dove', 'chi', 'quando', 'quale', 'quanto'];
+                    prompts.forEach(p => {
+                        queries.add(`${p} ${trimmed}`);
+                    });
+                } else if (strategy === 'prepositions') {
+                    const prepositions = ['per', 'con', 'da', 'a', 'in', 'su', 'tra', 'fra', 'come'];
+                    prepositions.forEach(prep => {
+                        queries.add(`${trimmed} ${prep}`);
+                    });
+                }
+            });
+            
+            return Array.from(queries);
+        }
+
+        // Toggle crawler state
+        function toggleScraper() {
+            if (isRunning) {
+                stopScraper();
+            } else {
+                startScraper();
+            }
+        }
+
+        // Start processing logic
+        async function startScraper() {
+            const seed = document.getElementById('seedKeyword').value.trim();
+            if (!seed) {
+                showToast("Inserisci una parola chiave per iniziare!");
+                return;
+            }
+
+            // Set UI to active running
+            isRunning = true;
+            document.getElementById('playIcon').classList.add('hidden');
+            document.getElementById('stopIcon').classList.remove('hidden');
+            document.getElementById('btnText').innerText = "Ferma Ricerca";
+            
+            const statusIndicator = document.getElementById('statStatus');
+            statusIndicator.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse block"></span> In esecuzione`;
+
+            // Reset local states
+            queue = [];
+            completedQueries.clear();
+            uniqueKeywords.clear();
+            resultsList = [];
+            actualApiCallCount = 0;
+
+            // Fetch all selected strategies
+            const selectedStrategies = Array.from(document.querySelectorAll('input[name="strategy"]:checked')).map(cb => cb.value);
+            
+            if (selectedStrategies.length === 0) {
+                showToast("Seleziona almeno un metodo di espansione!");
+                stopScraper();
+                return;
+            }
+
+            const maxDepth = parseInt(document.getElementById('searchDepth').value);
+            const maxQueriesLimit = parseInt(document.getElementById('maxQueries').value);
+            const delayTime = parseInt(document.getElementById('requestDelay').value);
+            const targetLang = document.getElementById('targetLanguage').value;
+
+            // Generate initial batch (Level 1 queries)
+            const initialInputs = buildSeedQueries(seed, selectedStrategies);
+            
+            // Populate initial queue
+            initialInputs.forEach(q => {
+                queue.push({
+                    queryText: q,
+                    parent: 'Seme Iniziale',
+                    depth: 1
+                });
+            });
+
+            totalApiCallsExpected = queue.length;
+            updateStatsUI();
+
+            logToConsole(`Inizializzazione completata. ${queue.length} query di partenza create.`, 'info');
+            logToConsole(`Avvio scraping ricorsivo (Profondità Max: ${maxDepth})...`, 'info');
+
+            // Recursive Worker Loop
+            while (queue.length > 0 && isRunning) {
+                // Safeguard check for API limits
+                if (actualApiCallCount >= maxQueriesLimit) {
+                    logToConsole(`Raggiunto il limite massimo stabilito di ${maxQueriesLimit} chiamate API.`, 'warn');
+                    break;
+                }
+
+                // Get next item from Queue
+                const currentJob = queue.shift();
+                
+                // Skip if we already query this string
+                if (completedQueries.has(currentJob.queryText.toLowerCase())) {
+                    continue;
+                }
+
+                logToConsole(`Scraping di: <b class="text-white">${currentJob.queryText}</b> (Profondità: ${currentJob.depth})`, 'info');
+                
+                // Increment actual API query count
+                actualApiCallCount++;
+                completedQueries.add(currentJob.queryText.toLowerCase());
+                
+                // Fetch Suggestions asynchronously
+                const suggestions = await fetchSuggestions(currentJob.queryText, targetLang);
+                
+                // Track matches
+                let newUniqueCount = 0;
+
+                suggestions.forEach(suggestion => {
+                    const normalizedSug = suggestion.trim();
+                    const lowerSug = normalizedSug.toLowerCase();
+
+                    // Apply Custom Filters
+                    if (!applyKeywordFilters(normalizedSug)) {
+                        return; // Excluded by user rules
+                    }
+
+                    if (!uniqueKeywords.has(lowerSug)) {
+                        uniqueKeywords.add(lowerSug);
+                        newUniqueCount++;
+
+                        // Push to results store
+                        resultsList.push({
+                            id: resultsList.length + 1,
+                            keyword: normalizedSug,
+                            parent: currentJob.queryText,
+                            depth: currentJob.depth
+                        });
+
+                        // If depth allows, schedule this suggested keyword as a sub-query for the next level!
+                        // This achieves the "branched" suggest mapping (e.g. AI per avvocati -> AI per avvocati gratis)
+                        if (currentJob.depth < maxDepth) {
+                            queue.push({
+                                queryText: normalizedSug,
+                                parent: currentJob.queryText,
+                                depth: currentJob.depth + 1
+                            });
+                        }
+                    }
+                });
+
+                if (newUniqueCount > 0) {
+                    logToConsole(`Trovati ${newUniqueCount} nuovi rami per "${currentJob.queryText}"`, 'success');
+                }
+
+                // UI Redraw
+                updateStatsUI();
+                renderData();
+
+                // Wait for Safety Delay between loops
+                await new Promise(r => setTimeout(r, delayTime));
+            }
+
+            stopScraper();
+            logToConsole(`Elaborazione terminata. Trovati ${resultsList.length} rami unici di keyword.`, 'success');
+            showToast("Ricerca keyword completata!");
+        }
+
+        // Filter checks
+        function applyKeywordFilters(keyword) {
+            const includeStr = document.getElementById('filterInclude').value.trim().toLowerCase();
+            const excludeStr = document.getElementById('filterExclude').value.trim().toLowerCase();
+            const normalized = keyword.toLowerCase();
+
+            // Include verification
+            if (includeStr) {
+                const includeTerms = includeStr.split(',').map(t => t.trim()).filter(Boolean);
+                if (includeTerms.length > 0) {
+                    const matchesAny = includeTerms.some(term => normalized.includes(term));
+                    if (!matchesAny) return false;
+                }
+            }
+
+            // Exclude verification
+            if (excludeStr) {
+                const excludeTerms = excludeStr.split(',').map(t => t.trim()).filter(Boolean);
+                if (excludeTerms.length > 0) {
+                    const matchesAny = excludeTerms.some(term => normalized.includes(term));
+                    if (matchesAny) return false;
+                }
+            }
+
+            return true;
+        }
+
+        // Stop crawler action
+        function stopScraper() {
+            isRunning = false;
+            document.getElementById('playIcon').classList.remove('hidden');
+            document.getElementById('stopIcon').classList.add('hidden');
+            document.getElementById('btnText').innerText = "Avvia Ricerca Ramificata";
+            
+            const statusIndicator = document.getElementById('statStatus');
+            statusIndicator.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-slate-600 block"></span> Inattivo`;
+            
+            updateStatsUI();
+        }
+
+        // Update statistics
+        function updateStatsUI() {
+            document.getElementById('statCount').innerText = uniqueKeywords.size;
+            document.getElementById('badgeTotal').innerText = `${uniqueKeywords.size} uniche`;
+            
+            const maxQueriesLimit = document.getElementById('maxQueries').value;
+            document.getElementById('statApiCount').innerText = `${actualApiCallCount} / ${maxQueriesLimit}`;
+            
+            const queueLen = queue.length;
+            document.getElementById('statQueue').innerText = queueLen;
+
+            // Simple percentage calculation
+            const totalProcessed = completedQueries.size;
+            const totalScheduled = totalProcessed + queueLen;
+            const pct = totalScheduled > 0 ? Math.round((totalProcessed / totalScheduled) * 100) : 0;
+            
+            document.getElementById('progressPercent').innerText = `${pct}%`;
+            document.getElementById('progressBar').style.width = `${pct}%`;
+        }
+
+        // Switch Tabs view
+        function switchTab(tabName) {
+            selectedTab = tabName;
+            
+            const tabBtnTable = document.getElementById('tabBtnTable');
+            const tabBtnTree = document.getElementById('tabBtnTree');
+            const viewTable = document.getElementById('viewTable');
+            const viewTree = document.getElementById('viewTree');
+
+            if (tabName === 'table') {
+                tabBtnTable.className = "px-3 py-1.5 rounded-lg text-xs font-medium transition bg-slate-800 text-white";
+                tabBtnTree.className = "px-3 py-1.5 rounded-lg text-xs font-medium transition text-slate-400 hover:text-white";
+                viewTable.classList.remove('hidden');
+                viewTree.classList.add('hidden');
+                renderTable();
+            } else {
+                tabBtnTree.className = "px-3 py-1.5 rounded-lg text-xs font-medium transition bg-slate-800 text-white";
+                tabBtnTable.className = "px-3 py-1.5 rounded-lg text-xs font-medium transition text-slate-400 hover:text-white";
+                viewTree.classList.remove('hidden');
+                viewTable.classList.add('hidden');
+                renderTree();
+            }
+        }
+
+        // Set Depth Filters
+        function setDepthFilter(depth) {
+            currentFilterDepth = depth;
+            
+            // Reset styles
+            const buttons = ['depthFilterAll', 'depthFilter1', 'depthFilter2', 'depthFilter3'];
+            buttons.forEach(id => {
+                const el = document.getElementById(id);
+                el.className = "text-xs px-2.5 py-1 rounded-md bg-slate-950 text-slate-400 border border-slate-800 font-medium hover:text-slate-200";
+            });
+
+            // Set active style
+            const activeId = depth === 0 ? 'depthFilterAll' : `depthFilter${depth}`;
+            document.getElementById(activeId).className = "text-xs px-2.5 py-1 rounded-md bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-medium";
+
+            renderTable();
+        }
+
+        // Direct drawing director
+        function renderData() {
+            if (selectedTab === 'table') {
+                renderTable();
+            } else {
+                renderTree();
+            }
+        }
+
+        // Print table list of items
+        function renderTable() {
+            const searchVal = document.getElementById('tableSearch').value.toLowerCase();
+            const tbody = document.getElementById('tableBody');
+            
+            let filtered = resultsList;
+
+            // Apply search filter
+            if (searchVal) {
+                filtered = filtered.filter(item => item.keyword.toLowerCase().includes(searchVal) || item.parent.toLowerCase().includes(searchVal));
+            }
+
+            // Apply depth filter
+            if (currentFilterDepth > 0) {
+                filtered = filtered.filter(item => item.depth === currentFilterDepth);
+            }
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="py-12 text-center text-slate-500">Nessun dato corrispondente ai criteri inseriti.</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(item => {
+                const depthBadge = item.depth === 1 ? 
+                    `<span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[10px] font-semibold px-2 py-0.5 rounded">Livello 1</span>` : 
+                    item.depth === 2 ? 
+                    `<span class="bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[10px] font-semibold px-2 py-0.5 rounded">Livello 2 (Ramo)</span>` : 
+                    `<span class="bg-pink-500/10 text-pink-400 border border-pink-500/20 text-[10px] font-semibold px-2 py-0.5 rounded">Livello 3 (Ultra)</span>`;
+
+                return `
+                    <tr class="hover:bg-slate-950/40 transition">
+                        <td class="py-3 px-6 text-xs text-slate-600 font-mono">#${item.id}</td>
+                        <td class="py-3 px-6 font-semibold text-slate-100">${item.keyword}</td>
+                        <td class="py-3 px-6 text-xs text-slate-400 font-mono">${item.parent}</td>
+                        <td class="py-3 px-6 text-center">${depthBadge}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Draw Interactive Hierarchical Tree Mapping
+        function renderTree() {
+            const container = document.getElementById('treeContainer');
+            
+            if (resultsList.length === 0) {
+                container.innerHTML = `<div class="text-center text-slate-500 py-12">I risultati verranno mostrati in forma di albero logico non appena inizierai a raccogliere keyword.</div>`;
+                return;
+            }
+
+            // Group suggestions by parent node
+            const treeData = {};
+            resultsList.forEach(item => {
+                const parent = item.parent;
+                if (!treeData[parent]) {
+                    treeData[parent] = [];
+                }
+                treeData[parent].push(item.keyword);
+            });
+
+            // Build hierarchical elements
+            let htmlTree = '<div class="space-y-6">';
+
+            // Root elements (usually level 1 parent nodes that correspond to the seed/strategy inputs)
+            const rootParents = Object.keys(treeData).filter(p => {
+                // A key is a root parent if it is NOT present as a suggestion inside any other node's array
+                return !resultsList.some(r => r.keyword.toLowerCase() === p.toLowerCase());
+            });
+
+            rootParents.forEach(root => {
+                const children = treeData[root] || [];
+                
+                htmlTree += `
+                    <div class="bg-slate-950/40 border border-slate-800/80 rounded-2xl p-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 shadow-lg shadow-indigo-500/30"></span>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">Nodo d'Origine:</span>
+                            <span class="font-bold text-slate-200 text-sm">${root}</span>
+                            <span class="text-[10px] bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-1.5 py-0.5 rounded font-bold">${children.length} rami</span>
+                        </div>
+                        <div class="ml-4 pl-4 border-l border-slate-800 space-y-4">
+                `;
+
+                // Render first level children (Level 1 Suggests)
+                children.forEach(child => {
+                    const subChildren = treeData[child] || [];
+                    const hasSub = subChildren.length > 0;
+
+                    htmlTree += `
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-slate-700">├─</span>
+                                <span class="text-sm font-medium text-slate-300 bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800">${child}</span>
+                                ${hasSub ? `<span class="text-[9px] bg-purple-500/10 text-purple-400 border border-purple-500/20 px-1.5 py-0.2 rounded font-bold">${subChildren.length} sub-rami</span>` : ''}
+                            </div>
+                    `;
+
+                    // Render second level sub-children (Level 2 Suggests)
+                    if (hasSub) {
+                        htmlTree += `<div class="ml-6 pl-4 border-l border-slate-800 space-y-1.5 pt-1">`;
+                        subChildren.forEach((subChild, index, arr) => {
+                            const sym = index === arr.length - 1 ? '└─' : '├─';
+                            htmlTree += `
+                                <div class="flex items-center gap-2 text-xs text-slate-400">
+                                    <span class="text-slate-700">${sym}</span>
+                                    <span class="hover:text-pink-400 transition cursor-default">${subChild}</span>
+                                </div>
+                            `;
+                        });
+                        htmlTree += `</div>`;
+                    }
+
+                    htmlTree += `</div>`;
+                });
+
+                htmlTree += `
+                        </div>
+                    </div>
+                `;
+            });
+
+            htmlTree += '</div>';
+            container.innerHTML = htmlTree;
+        }
+
+        // Export To CSV file
+        function exportToCSV() {
+            if (resultsList.length === 0) {
+                showToast("Nessun dato da esportare!");
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "ID;Keyword;Parent;Level\r\n";
+
+            resultsList.forEach(item => {
+                // Escape quotes
+                const cleanKeyword = item.keyword.replace(/"/g, '""');
+                const cleanParent = item.parent.replace(/"/g, '""');
+                csvContent += `"${item.id}";"${cleanKeyword}";"${cleanParent}";"${item.depth}"\r\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            const seed = document.getElementById('seedKeyword').value.trim().replace(/\s+/g, '_');
+            link.setAttribute("download", `deep_keywords_${seed || 'suggest'}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("Esportazione CSV completata!");
+        }
+
+        // Copy Plain Keywords List to clipboard
+        function copyToClipboard() {
+            if (resultsList.length === 0) {
+                showToast("Nessuna parola chiave trovata!");
+                return;
+            }
+
+            const cleanList = resultsList.map(i => i.keyword).join('\n');
+            
+            // Standard backup for Clipboard API within frames
+            const tempTextarea = document.createElement('textarea');
+            tempTextarea.value = cleanList;
+            document.body.appendChild(tempTextarea);
+            tempTextarea.select();
+            
+            try {
+                document.execCommand('copy');
+                showToast("Lista copiata negli appunti!");
+            } catch (err) {
+                showToast("Errore durante la copia negli appunti.");
+            }
+            
+            document.body.removeChild(tempTextarea);
+        }
+    </script>
+</body>
+</html>
